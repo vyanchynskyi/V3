@@ -36,14 +36,14 @@ function send(type) {
     return;
   }
 
-  fetch(apiUrl, {
+ fetch(apiUrl, {
     method: "POST",
+    mode: "no-cors", // <--- Добавьте эту строку
     body: JSON.stringify({ type, name, surname }),
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "text/plain" } // Изменено с application/json
   })
-  .then(r => r.text())
-  .then(res => {
-    document.getElementById("msg").innerText = "Данные успешно записаны!";
+  .then(() => {
+    document.getElementById("msg").innerText = "Запрос отправлен! Проверьте таблицу.";
     document.getElementById("name").value = "";
     document.getElementById("surname").value = "";
   })
@@ -55,3 +55,5 @@ function send(type) {
 
 </body>
 </html>
+
+
