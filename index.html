@@ -8,64 +8,60 @@
     input { font-size: 18px; padding: 10px; margin: 8px; width: 80%; }
     button { font-size: 20px; padding: 15px; margin: 10px; width: 85%; cursor: pointer; }
     #msg { margin-top: 20px; font-weight: bold; color: green; }
+    /* Скрытый iframe, чтобы страница не перезагружалась при отправке */
+    #hidden_iframe { display: none; }
   </style>
 </head>
 <body>
 
 <h2>Регистрация входа / выхода</h2>
 
-<input id="name" placeholder="Имя">
-<input id="surname" placeholder="Фамилия">
-
-<br>
-
-<button onclick="send('enter')">ВХОД</button>
-<button onclick="send('exit')">ВЫХОД</button>
+<!-- Форма отправляет данные напрямую в Google -->
+<form id="regForm" action="https://script.google.com" method="GET" target="hidden_iframe">
+  <input type="hidden" name="type" id="typeInput">
+  <input name="name" id="name" placeholder="Имя" required>
+  <input name="surname" id="surname" placeholder="Фамилия" required>
+  <br>
+  <button type="button" onclick="submitForm('enter')">ВХОД</button>
+  <button type="button" onclick="submitForm('exit')">ВЫХОД</button>
+</form>
 
 <p id="msg"></p>
 
+<!-- Сюда придет ответ от Google, который мы не увидим, но форма сработает -->
+<iframe name="hidden_iframe" id="hidden_iframe" onload="if(submitted) showSuccess()"></iframe>
+
 <script>
-const apiUrl = "https://script.google.com/macros/s/AKfycbyTVf3sKu6UsTkSYx2i7cmEwlIgrIdWhnTIcTxaTJhVD_2jDwUofIxyFgwVCf_EYrPm/exec"; 
+  let submitted = false;
+  let currentType = '';
 
-async function send(type) {
-  const name = document.getElementById("name").value.trim();
-  const surname = document.getElementById("surname").value.trim();
-  const msgEl = document.getElementById("msg");
-
-  if (!name || !surname) {
-    alert("Введите имя и фамилию");
-    return;
-  }
-
-  msgEl.style.color = "blue";
-  msgEl.innerText = "Отправка...";
-
-  const finalUrl = `${apiUrl}?type=${encodeURIComponent(type)}&name=${encodeURIComponent(name)}&surname=${encodeURIComponent(surname)}`;
-
-  try {
-    // Используем fetch в режиме no-cors. 
-    // В этом режиме мы не сможем прочитать ответ "OK", но данные 100% уйдут в таблицу.
-    await fetch(finalUrl, {
-      method: 'GET',
-      mode: 'no-cors',
-      keepalive: true
-    });
-
-    // Если fetch не упал с ошибкой, значит запрос ушел
-    msgEl.style.color = "green";
-    msgEl.innerText = "Готово! Данные отправлены.";
-    document.getElementById("name").value = "";
-    document.getElementById("surname").value = "";
+  function submitForm(type) {
+    const name = document.getElementById("name").value.trim();
+    const surname = document.getElementById("surname").value.trim();
     
-  } catch (err) {
-    console.error(err);
-    msgEl.style.color = "red";
-    msgEl.innerText = "Ошибка сети. Попробуйте еще раз.";
+    if (!name || !surname) {
+      alert("Введите имя и фамилию");
+      return;
+    }
+
+    submitted = true;
+    currentType = type;
+    document.getElementById("typeInput").value = type;
+    document.getElementById("msg").innerText = "Отправка...";
+    document.getElementById("regForm").submit();
   }
-}
+
+  function showSuccess() {
+    if (submitted) {
+      const msgEl = document.getElementById("msg");
+      msgEl.style.color = "green";
+      msgEl.innerText = "Успешно: " + (currentType === 'enter' ? "ВХОД" : "ВЫХОД") + " зафиксирован!";
+      document.getElementById("name").value = "";
+      document.getElementById("surname").value = "";
+      submitted = false;
+    }
+  }
 </script>
 
 </body>
 </html>
-
-
