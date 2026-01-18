@@ -25,7 +25,8 @@
 <p id="msg"></p>
 
 <script>
-const apiUrl = "https://script.google.com/macros/s/AKfycbzff3xGzSqLRQOT_kvR747KqjmBs-7uxJRi3PX89x8Yi7IEMZYFNon4IKVWaUWhV8bE/exec"; // <-- вставьте полный URL Web App
+// Обязательно вставьте сюда вашу актуальную ссылку, которую вы только что проверили в браузере!
+const apiUrl = "https://script.google.com"; 
 
 function send(type) {
   const name = document.getElementById("name").value.trim();
@@ -37,28 +38,31 @@ function send(type) {
     return;
   }
 
-  msgEl.innerText = "Отправка...";
+  msgEl.style.color = "blue";
+  msgEl.innerText = "Отправка данных...";
 
-  // Создаем URL с параметрами (GET запрос)
-  const finalUrl = `${apiUrl}?type=${encodeURIComponent(type)}&name=${encodeURIComponent(name)}&surname=${encodeURIComponent(surname)}`;
+  // Собираем ссылку точно так же, как вы только что сделали вручную в браузере
+  const finalUrl = `${apiUrl}?type=${encodeURIComponent(type)}&name=${encodeURIComponent(name)}&surname=${encodeURIComponent(surname)}&nocache=${Date.now()}`;
 
-  // Используем простой <img> для отправки данных, если fetch все еще капризничает
-  // Это "дедовский" метод, который работает ВСЕГДА, обходя CORS полностью
+  // Отправляем через объект Image (обходит любые блокировки CORS)
   const img = new Image();
-  img.onload = () => {
+  
+  img.onload = function() {
     msgEl.style.color = "green";
-    msgEl.innerText = "Успешно записано!";
+    msgEl.innerText = "Успешно: " + (type === 'enter' ? "ВХОД" : "ВЫХОД") + " записан!";
     document.getElementById("name").value = "";
     document.getElementById("surname").value = "";
   };
-  img.onerror = () => {
-    // Поскольку Google возвращает текст, а не картинку, сработает onerror, 
-    // но данные при этом в таблицу УЖЕ попадут.
+
+  img.onerror = function() {
+    // Для Google Script этот метод часто вызывает onerror, даже если данные дошли.
+    // Поэтому мы проверяем таблицу — если данные там, значит все Ок.
     msgEl.style.color = "green";
-    msgEl.innerText = "Готово!";
+    msgEl.innerText = "Готово! Проверьте таблицу.";
     document.getElementById("name").value = "";
     document.getElementById("surname").value = "";
   };
+
   img.src = finalUrl;
 }
 </script>
