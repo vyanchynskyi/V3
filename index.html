@@ -36,31 +36,33 @@
   let currentType = '';
 
   function submitForm(type) {
-    const name = document.getElementById("name").value.trim();
-    const surname = document.getElementById("surname").value.trim();
-    
-    if (!name || !surname) {
-      alert("Введите имя и фамилию");
-      return;
-    }
+  const name = document.getElementById("name").value.trim();
+  const surname = document.getElementById("surname").value.trim();
 
-    submitted = true;
-    currentType = type;
-    document.getElementById("typeInput").value = type;
-    document.getElementById("msg").innerText = "Отправка...";
-    document.getElementById("regForm").submit();
+  if (!name || !surname) {
+    alert("Введите имя и фамилию");
+    return;
   }
 
-  function showSuccess() {
-    if (submitted) {
-      const msgEl = document.getElementById("msg");
-      msgEl.style.color = "green";
-      msgEl.innerText = "Успешно: " + (currentType === 'enter' ? "ВХОД" : "ВЫХОД") + " зафиксирован!";
+  document.getElementById("msg").innerText = "Отправка...";
+
+  const params = new URLSearchParams({
+    type: type,
+    name: name,
+    surname: surname
+  });
+
+  fetch("https://script.google.com/macros/s/AKfycbyTVf3sKu6UsTkSYx2i7cmEwlIgrIdWhnTIcTxaTJhVD_2jDwUofIxyFgwVCf_EYrPm/exec?" + params)
+    .then(() => {
+      document.getElementById("msg").innerText =
+        "Успешно: " + (type === "enter" ? "ВХОД" : "ВЫХОД") + " зафиксирован!";
       document.getElementById("name").value = "";
       document.getElementById("surname").value = "";
-      submitted = false;
-    }
-  }
+    })
+    .catch(() => {
+      document.getElementById("msg").innerText = "Ошибка отправки";
+    });
+}
 </script>
 
 </body>
