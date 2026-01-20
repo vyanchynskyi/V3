@@ -3,64 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <title>Check-in / Check-out</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body { font-family: Arial; text-align: center; padding: 30px; }
-    input { font-size: 18px; padding: 10px; margin: 8px; width: 80%; }
-    button { font-size: 20px; padding: 15px; margin: 10px; width: 85%; cursor: pointer; }
-    #msg { margin-top: 20px; font-weight: bold; color: green; }
-    /* Скрытый iframe, чтобы страница не перезагружалась при отправке */
-    #hidden_iframe { display: none; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #f4f4f4;
+    }
+
+    input {
+      font-size: 18px;
+      padding: 12px;
+      margin: 8px;
+      width: 90%;
+      max-width: 350px;
+    }
+
+    button {
+      font-size: 20px;
+      padding: 15px;
+      margin: 10px;
+      width: 95%;
+      max-width: 380px;
+      cursor: pointer;
+    }
+
+    #msg {
+      margin-top: 20px;
+      font-weight: bold;
+      color: green;
+    }
   </style>
 </head>
+
 <body>
 
-<h2>Регистрация входа / выхода</h2>
+  <h2>Регистрация входа / выхода</h2>
 
-<!-- Форма без target="hidden_iframe" для 100% срабатывания на смартфонах -->
-<form id="regForm" action="https://script.google.com/macros/s/AKfycbyTVf3sKu6UsTkSYx2i7cmEwlIgrIdWhnTIcTxaTJhVD_2jDwUofIxyFgwVCf_EYrPm/exec" method="GET" onsubmit="return handleWait()">
-  <input type="hidden" name="type" id="typeInput">
-  <input name="name" id="name" placeholder="Имя" required>
-  <input name="surname" id="surname" placeholder="Фамилия" required>
+  <input id="name" placeholder="Имя" required>
+  <input id="surname" placeholder="Фамилия" required>
+
   <br>
-  <button type="button" onclick="submitForm('enter')">ВХОД</button>
-  <button type="button" onclick="submitForm('exit')">ВЫХОД</button>
-</form>
 
-<p id="msg"></p>
+  <button onclick="sendData('enter')">ВХОД</button>
+  <button onclick="sendData('exit')">ВЫХОД</button>
 
+  <p id="msg"></p>
 
 <script>
-  let submitted = false;
-  let currentType = '';
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTVf3sKu6UsTkSYx2i7cmEwlIgrIdWhnTIcTxaTJhVD_2jDwUofIxyFgwVCf_EYrPm/exec";
 
-  function submitForm(type) {
-  const name = document.getElementById("name").value.trim();
-  const surname = document.getElementById("surname").value.trim();
+  function sendData(type) {
+    const name = document.getElementById("name").value.trim();
+    const surname = document.getElementById("surname").value.trim();
+    const msg = document.getElementById("msg");
 
-  if (!name || !surname) {
-    alert("Введите имя и фамилию");
-    return;
-  }
+    if (!name || !surname) {
+      alert("Введите имя и фамилию");
+      return;
+    }
 
-  document.getElementById("msg").innerText = "Отправка...";
+    msg.style.color = "black";
+    msg.innerText = "Отправка...";
 
-  const params = new URLSearchParams({
-    type: type,
-    name: name,
-    surname: surname
-  });
-
-  fetch("https://script.google.com/macros/s/AKfycbyTVf3sKu6UsTkSYx2i7cmEwlIgrIdWhnTIcTxaTJhVD_2jDwUofIxyFgwVCf_EYrPm/exec?" + params)
-    .then(() => {
-      document.getElementById("msg").innerText =
-        "Успешно: " + (type === "enter" ? "ВХОД" : "ВЫХОД") + " зафиксирован!";
-      document.getElementById("name").value = "";
-      document.getElementById("surname").value = "";
-    })
-    .catch(() => {
-      document.getElementById("msg").innerText = "Ошибка отправки";
+    const params = new URLSearchParams({
+      type: type,
+      name: name,
+      surname: surname
     });
-}
+
+    fetch(SCRIPT_URL + "?" + params.toString())
+      .then(() => {
+        msg.style.color = "green";
+        msg.innerText =
+          "Успешно: " + (type === "enter" ? "ВХОД" : "ВЫХОД") + " зафиксирован!";
+        document.getElementById("name").value = "";
+        document.getElementById("surname").value = "";
+      })
+      .catch(() => {
+        msg.style.color = "red";
+        msg.innerText = "Ошибка отправки";
+      });
+  }
 </script>
 
 </body>
